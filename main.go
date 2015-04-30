@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana/pkg/api"
+	"github.com/grafana/grafana/pkg/alerting"
 	"github.com/grafana/grafana/pkg/cmd"
 	"github.com/grafana/grafana/pkg/log"
 	"github.com/grafana/grafana/pkg/metrics"
@@ -64,6 +65,8 @@ func main() {
 	if setting.ReportingEnabled {
 		go metrics.StartUsageReportLoop()
 	}
+	go alerting.Dispatcher()
+	go alerting.Executor()
 
 	cmd.StartServer()
 
