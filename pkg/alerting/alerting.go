@@ -7,7 +7,6 @@ import (
 
 	"bosun.org/cmd/bosun/cache"
 	"bosun.org/cmd/bosun/expr"
-	"bosun.org/cmd/bosun/sched"
 	"bosun.org/graphite"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -22,7 +21,7 @@ func getAlignedTicker() *time.Ticker {
 type Job struct {
 	key  string
 	expr string
-	ts   time.Time
+	ts   time.Time  // sets an explicit "until" to match the data this alert run is meant for, even when execution is delayed
 }
 
 var queue = make(chan Job) // TODO: use rabbitmq or something so we can have multiple grafana dispatchers and executors
@@ -84,16 +83,7 @@ func Executor() {
 		// TODO recreate new cache at each second because cache is pointless at the next interval
 		cacheObj := cache.New(0)
 
-		// TODO once auth works, do it without rh. should work too because RH should only be used for bosun's own alerts and notifications
-		rh := &sched.RunHistory{
-			Cache:           cacheObj,
-			Start:           job.ts, // this sets an explicit "until" to match the data this alert run is meant for, even when we are delayed
-			Events:          make(map[expr.AlertKey]*sched.Event),
-			Context:         nil,
-			GraphiteContext: gr,
-			Logstash:        make([]string, 0),
-		}
-		results, _, err := exp.Execute(rh.Context, rh.GraphiteContext, rh.Logstash, rh.Cache, nil, rh.Start, 0, true, nil, nil, nil)
+		results, _, err := exp.Execute(nil, gr, nil, cacheObj, nil, job.ts, 0, true, nil, nil, nil)
 		fmt.Println(job.ts, job.expr)
 		for _, res := range results.Results {
 			fmt.Println(res.Group, res.Value)
