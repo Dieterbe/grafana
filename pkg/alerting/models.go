@@ -9,31 +9,21 @@ import (
 )
 
 type CheckDef struct {
-	// Freq      uint32
-	// Offset    uint8 // offset on top of "even" minute/10s/.. intervals
-	// Expr      string // "median(foo...) "
-	// LevelWarn float64 // > 5 , < 10
-	// LevelCrit float64 // > 10, < 5
 	CritExpr string
 	WarnExpr string
 }
 
-type Check struct {
-	Id           int64
-	OrgId        int64
-	DataSourceId int64
-	Definition   CheckDef
+func (c CheckDef) String() string {
+	return fmt.Sprintf("<CheckDef> Crit: %s -- Warn: %s", c.CritExpr, c.WarnExpr)
 }
 
-// func (check *Check) getDataSource() {
-// 	dsQuery := m.GetDataSourceByIdQuery{Id: check.Id}
-//
-// 	if err := bus.Dispatch(&dsQuery); err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return dsQuery.Result
-// }
+type Check struct {
+	// do we need these members here?
+	//Id           int64
+	//OrgId        int64
+	//DataSourceId int64
+	Definition CheckDef
+}
 
 type CheckEvalResult int
 
