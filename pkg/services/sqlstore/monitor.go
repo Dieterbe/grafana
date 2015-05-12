@@ -57,7 +57,7 @@ FROM monitor
     INNER JOIN endpoint on monitor.endpoint_id = endpoint.id
     LEFT JOIN monitor_collector ON monitor.id = monitor_collector.monitor_id
     LEFT JOIN monitor_collector_tag ON monitor.id = monitor_collector_tag.monitor_id
-    LEFT JOIN 
+    LEFT JOIN
         (SELECT
             collector.id AS collector_id,
             collector_tag.tag as tag
@@ -153,7 +153,7 @@ FROM monitor
     INNER JOIN endpoint on endpoint.id = monitor.endpoint_id
     LEFT JOIN monitor_collector ON monitor.id = monitor_collector.monitor_id
     LEFT JOIN monitor_collector_tag ON monitor.id = monitor_collector_tag.monitor_id
-    LEFT JOIN 
+    LEFT JOIN
         (SELECT
             collector.id AS collector_id,
             collector_tag.tag as tag
@@ -180,7 +180,7 @@ FROM monitor
 
 	if len(query.CollectorId) > 0 {
 		rawSql += "LEFT JOIN monitor_collector AS mc ON mc.monitor_id = monitor.id\n"
-		rawSql += `LEFT JOIN 
+		rawSql += `LEFT JOIN
         (SELECT
             collector.id AS collector_id,
             collector_tag.tag as tag
@@ -465,17 +465,18 @@ func addMonitorTransaction(cmd *m.AddMonitorCommand, sess *session) error {
 	}
 
 	mon := &m.Monitor{
-		EndpointId:    cmd.EndpointId,
-		OrgId:         cmd.OrgId,
-		MonitorTypeId: cmd.MonitorTypeId,
-		Offset:        rand.Int63n(cmd.Frequency - 1),
-		Settings:      cmd.Settings,
-		Created:       time.Now(),
-		Updated:       time.Now(),
-		Frequency:     cmd.Frequency,
-		Enabled:       cmd.Enabled,
-		State:         -1,
-		StateChange:   time.Now(),
+		EndpointId:     cmd.EndpointId,
+		OrgId:          cmd.OrgId,
+		MonitorTypeId:  cmd.MonitorTypeId,
+		Offset:         rand.Int63n(cmd.Frequency - 1),
+		Settings:       cmd.Settings,
+		HealthSettings: cmd.HealthSettings,
+		Created:        time.Now(),
+		Updated:        time.Now(),
+		Frequency:      cmd.Frequency,
+		Enabled:        cmd.Enabled,
+		State:          -1,
+		StateChange:    time.Now(),
 	}
 
 	if _, err := sess.Insert(mon); err != nil {
@@ -819,8 +820,8 @@ func getCollectorIdsFromTags(orgId int64, tags []string, sess *session) ([]int64
 	params := make([]interface{}, 0)
 	rawSql := `SELECT DISTINCT(collector.id) AS collector_id
 	FROM collector
-	INNER JOIN collector_tag ON collector.id = collector_tag.collector_id 
-	WHERE (collector.public=1 OR collector.org_id=?) 
+	INNER JOIN collector_tag ON collector.id = collector_tag.collector_id
+	WHERE (collector.public=1 OR collector.org_id=?)
 		AND collector_tag.org_id=?
 	`
 
